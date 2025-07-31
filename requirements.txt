@@ -1,0 +1,14 @@
+# Cathay API Testing Framework Dependencies
+# For use with Python virtual environment
+
+# Core dependencies
+python-docx>=0.8.11
+
+# Development and testing utilities (optional)
+# Add these if you need additional development tools:
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
+
+# Note: Newman CLI must be installed globally via npm:
+# npm install -g newman newman-reporter-htmlextra
