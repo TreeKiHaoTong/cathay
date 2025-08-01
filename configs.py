@@ -1,14 +1,14 @@
 PRODUCT = {
-    'api_test' : 'api_test/product/cathay_product.postman_collection.json' 
+    'api_test' : 'api_test/product/cathay_products.postman_collection.json' 
 }
 
-CATEGORY = {
-    'api_test' : 'api_test/category/cathay_category.postman_collection.json'
-}
+# CATEGORY = {
+#     'api_test' : 'api_test/category/cathay_category.postman_collection.json'
+# }
 
-BRAND = {
-    'api_test' : 'api_test/brand/cathay_brand.postman_collection.json'
-}
+# BRAND = {
+#     'api_test' : 'api_test/brand/cathay_brand.postman_collection.json'
+# }
 
 # GRAPH = {
 #     'api_test' : 'api_test/graph/CORE_graph.postman_collection.json'
@@ -43,9 +43,9 @@ BRAND = {
 # }
 
 # 併發執行的測試
-MODULE = {'product': PRODUCT, 'category': CATEGORY, 'brand': BRAND}
+MODULE = {'product': PRODUCT}
 
 # 不併發執行的測試，會在併發測試結束後，依序執行
-# MODULE_NON_CONCURRENT = {'audit_log': AUDIT_LOG}
+MODULE_NON_CONCURRENT = {}
 
 # MODULE_SCHEDULE = {'case_doc': CASE_DOC}

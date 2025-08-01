@@ -56,6 +56,10 @@ class CT:
             for integration_test_name in self.urls:
                 if integration_test_name.startswith('integration_test') and integration_test_name not in self.executed_tests:
                     unexecuted_integration_tests.append(self.module_name + "_" + integration_test_name)
+            print(f"Newman命令執行失敗: {' '.join(command)}")
+            print(f"返回碼: {result.returncode}")
+            print(f"標準輸出: {result.stdout}")
+            print(f"標準錯誤: {result.stderr}")
             raise ValueError(f"API 測試失敗: {key}\n\n")
 
         if key.startswith('integration_test') and result.returncode != 0:
@@ -131,4 +135,7 @@ if __name__ == "__main__":
         write_failed_tests_to_file()
         convert_json_to_word()
     except Exception as e:
+        import traceback
         print(f"Exception: {e}")
+        print("詳細錯誤追蹤:")
+        traceback.print_exc()

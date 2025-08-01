@@ -191,7 +191,7 @@ class WordConverter:
             host += host_e + '.'
         host = host.rstrip('.')  #移除最後多餘的點
 
-        port = url_data['port']
+        port = url_data.get('port', '')
 
         path = ''
         for path_e in url_data['path']:
@@ -205,5 +205,8 @@ class WordConverter:
             query = query.rstrip('&')
 
         # 組合完整 URL
-        return f'{protocol}://{host}:{port}{path}{query}'
+        if port:
+            return f'{protocol}://{host}:{port}{path}{query}'
+        else:
+            return f'{protocol}://{host}{path}{query}'
 

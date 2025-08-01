@@ -1,0 +1,859 @@
+{
+	"info": {
+		"_postman_id": "2c9b4f21-bd6d-4c02-a17f-2aa09a0e1e35",
+		"name": "cathay_products",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46093295",
+		"_collection_link": "https://ryan-6671504.postman.co/workspace/Ryan's-Workspace~fe01d57c-6601-485a-846d-76233ed274f1/collection/46093295-2c9b4f21-bd6d-4c02-a17f-2aa09a0e1e35?action=share&source=collection_link&creator=46093295"
+	},
+	"item": [
+		{
+			"name": "get all products(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"// 0. 驗 status code\r",
+							"pm.test(\"狀態碼是 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 1. pagination 基本欄位存在\r",
+							"pm.test(\"pagination 欄位存在\", () => {\r",
+							"    const expected = [\"current_page\", \"data\", \"from\", \"last_page\", \"per_page\", \"to\", \"total\"];\r",
+							"    expected.forEach(k => pm.expect(json, `缺少 ${k}`).to.have.property(k));\r",
+							"    pm.expect(json.data, \"data 應該是陣列\").to.be.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 簡單 helper：檢查某個物件有一組欄位\r",
+							"function expectFields(obj, fields, label) {\r",
+							"    fields.forEach(f => pm.expect(obj, `${label} 缺少欄位 ${f}`).to.have.property(f));\r",
+							"}\r",
+							"\r",
+							"// 2. data 內容最核心檢查\r",
+							"pm.test(\"data 每筆至少有主要欄位且型態合理\", () => {\r",
+							"    const arr = json.data;\r",
+							"    pm.expect(arr.length, \"data 不能是空陣列\").to.be.above(0);\r",
+							"\r",
+							"    arr.forEach((item, idx) => {\r",
+							"        const label = `第 ${idx}`;\r",
+							"\r",
+							"        // 必要 top-level 欄位\r",
+							"        expectFields(item, [\"id\", \"name\", \"price\", \"in_stock\", \"product_image\", \"category\", \"brand\"], label);\r",
+							"\r",
+							"        // 型態檢查\r",
+							"        pm.expect(item.id, `${label} id 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.price, `${label} price 不是數字`).to.be.a(\"number\");\r",
+							"        pm.expect(item.in_stock, `${label} in_stock 不是布林`).to.be.a(\"boolean\");\r",
+							"\r",
+							"        // product_image：只要有 id, title 並且是 object\r",
+							"        pm.expect(item.product_image, `${label} product_image 不是物件`).to.be.an(\"object\");\r",
+							"        expectFields(item.product_image, [\"id\", \"title\"], `${label} product_image`);\r",
+							"\r",
+							"        // category：object + id, name\r",
+							"        pm.expect(item.category, `${label} category 不是物件`).to.be.an(\"object\");\r",
+							"        expectFields(item.category, [\"id\", \"name\"], `${label} category`);\r",
+							"\r",
+							"        // brand：object + id, name\r",
+							"        pm.expect(item.brand, `${label} brand 不是物件`).to.be.an(\"object\");\r",
+							"        expectFields(item.brand, [\"id\", \"name\"], `${label} brand`);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 3. 把 data 第一筆的 id 存成 collection variable\r",
+							"const firstId = json.data[0].id;\r",
+							"pm.collectionVariables.set(\"productId\", firstId);\r",
+							"// 4. 取得第一筆 data 的 category id\r",
+							"const firstCategoryId = json.data[0].category.id;\r",
+							"pm.collectionVariables.set(\"categoryId\", firstCategoryId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by ID(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const item = pm.response.json();\r",
+							"\r",
+							"// helper：判斷是不是布林或 0/1\r",
+							"function isBoolLike(val) {\r",
+							"    return typeof val === \"boolean\" || val === 0 || val === 1;\r",
+							"}\r",
+							"\r",
+							"// ---------- 1. top-level 必要欄位存在與型別 ----------\r",
+							"pm.test(\"top-level 欄位存在並且型態正確\", () => {\r",
+							"    pm.expect(item).to.have.property(\"id\").that.is.a(\"string\");\r",
+							"    pm.expect(item).to.have.property(\"name\").that.is.a(\"string\");\r",
+							"    pm.expect(item).to.have.property(\"description\").that.is.a(\"string\");\r",
+							"    pm.expect(item).to.have.property(\"price\").that.is.a(\"number\");\r",
+							"\r",
+							"    pm.expect(item).to.have.property(\"is_location_offer\");\r",
+							"    pm.expect(item.is_location_offer, \"is_location_offer 應為 boolean 或 0/1\").satisfy(isBoolLike);\r",
+							"\r",
+							"    pm.expect(item).to.have.property(\"is_rental\");\r",
+							"    pm.expect(item.is_rental, \"is_rental 應為 boolean 或 0/1\").satisfy(isBoolLike);\r",
+							"\r",
+							"    pm.expect(item).to.have.property(\"in_stock\");\r",
+							"    pm.expect(item.in_stock, \"in_stock 應為 boolean 或 0/1\").satisfy(isBoolLike);\r",
+							"\r",
+							"    pm.expect(item).to.have.property(\"brand\").that.is.an(\"object\");\r",
+							"    pm.expect(item).to.have.property(\"category\").that.is.an(\"object\");\r",
+							"    pm.expect(item).to.have.property(\"product_image\").that.is.an(\"object\");\r",
+							"});\r",
+							"\r",
+							"// ---------- 2. brand schema ----------\r",
+							"pm.test(\"brand 有正確欄位且型態正確\", () => {\r",
+							"    const b = item.brand;\r",
+							"    pm.expect(b).to.have.property(\"id\").that.is.a(\"string\");\r",
+							"    pm.expect(b).to.have.property(\"name\").that.is.a(\"string\");\r",
+							"    pm.expect(b).to.have.property(\"slug\").that.is.a(\"string\");\r",
+							"});\r",
+							"\r",
+							"// ---------- 3. category schema ----------\r",
+							"pm.test(\"category 有正確欄位且型態正確\", () => {\r",
+							"    const c = item.category;\r",
+							"    pm.expect(c).to.have.property(\"id\").that.is.a(\"string\");\r",
+							"    pm.expect(c).to.have.property(\"parent_id\").that.is.a(\"string\");\r",
+							"    pm.expect(c).to.have.property(\"name\").that.is.a(\"string\");\r",
+							"    pm.expect(c).to.have.property(\"slug\").that.is.a(\"string\");\r",
+							"    // pm.expect(c).to.have.property(\"sub_categories\").that.is.an(\"array\");\r",
+							"    // // sub_categories 裡面的每一項是字串\r",
+							"    // c.sub_categories.forEach((sc, i) => {\r",
+							"    //     pm.expect(sc, `sub_categories[${i}] 不是字串`).to.be.a(\"string\");\r",
+							"    // });\r",
+							"});\r",
+							"\r",
+							"// ---------- 4. product_image schema ----------\r",
+							"pm.test(\"product_image 有正確欄位且型態正確\", () => {\r",
+							"    const p = item.product_image;\r",
+							"    pm.expect(p).to.have.property(\"id\").that.is.a(\"string\");\r",
+							"    pm.expect(p).to.have.property(\"by_name\").that.is.a(\"string\");\r",
+							"    pm.expect(p).to.have.property(\"by_url\").that.is.a(\"string\");\r",
+							"    pm.expect(p).to.have.property(\"source_name\").that.is.a(\"string\");\r",
+							"    pm.expect(p).to.have.property(\"source_url\").that.is.a(\"string\");\r",
+							"    pm.expect(p).to.have.property(\"file_name\").that.is.a(\"string\");\r",
+							"    pm.expect(p).to.have.property(\"title\").that.is.a(\"string\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by page(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 先解析第一頁回應\r",
+							"const first = pm.response.json();\r",
+							"const lastPage = first.last_page;\r",
+							"\r",
+							"// 基本斷言\r",
+							"pm.test(\"第一頁 current_page 應為 1\", () => {\r",
+							"    pm.expect(first.current_page).to.eql(1);\r",
+							"});\r",
+							"pm.test(\"last_page 欄位存在，且 >=1\", () => {\r",
+							"    pm.expect(lastPage).to.be.a(\"number\").and.to.be.at.least(1);\r",
+							"});\r",
+							"\r",
+							"// 2. 從第 2 頁到最後一頁\r",
+							"for (let p = 2; p <= lastPage; p++) {\r",
+							"    pm.sendRequest({\r",
+							"        url: `${pm.collectionVariables.get(\"baseUrl\")}/products?page=${p}`,\r",
+							"        method: \"GET\",\r",
+							"        header: { \"Content-Type\": \"application/json\" }\r",
+							"    }, function (err, res) {\r",
+							"        // 斷言 HTTP 狀態碼\r",
+							"        pm.test(`頁 ${p} 回傳 200`, function () {\r",
+							"            pm.expect(err).to.equal(null);\r",
+							"            pm.expect(res).to.have.property(\"code\", 200);\r",
+							"        });\r",
+							"\r",
+							"        const body = res.json();\r",
+							"        // 斷言 current_page\r",
+							"        pm.test(`頁 ${p} current_page 應為 ${p}`, function () {\r",
+							"            pm.expect(body.current_page).to.eql(p);\r",
+							"        });\r",
+							"        // 斷言 data 不為空\r",
+							"        pm.test(`頁 ${p} data 不為空`, function () {\r",
+							"            pm.expect(body.data).to.be.an(\"array\").with.length.above(0);\r",
+							"        });\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by category(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 解析回應 JSON\r",
+							"const json = pm.response.json();\r",
+							"\r",
+							"// 2. 驗證 Status code 是 200\r",
+							"pm.test(\"狀態碼為 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證 data 陣列存在且非空\r",
+							"pm.test(\"data 不為空\", () => {\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\").with.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// 4. 取得傳入的 categoryId\r",
+							"const expectedCategoryId = pm.collectionVariables.get(\"categoryId\");\r",
+							"\r",
+							"// 5. 驗證每一筆資料的 category.id 都等於傳入的值\r",
+							"pm.test(\"每筆資料的 category.id 都等於輸入的 categoryId\", () => {\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.nested.property(\"category.id\", expectedCategoryId, \r",
+							"            `第 ${idx + 1} 筆資料的 category.id 應為 ${expectedCategoryId}`);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_category={{categoryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_category",
+							"value": "{{categoryId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by price ASC(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    // 確認有 data 屬性\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    // 確認 data 是陣列，且長度大於 0\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"// 3. 驗證 data 裡的 price 由小到大排序\r",
+							"pm.test(\"data 內的 price 由小到大排序\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const prices = json.data.map(item => item.price);\r",
+							"    // 複製一份並排序作為參考\r",
+							"    const sortedPrices = [...prices].sort((a, b) => a - b);\r",
+							"    pm.expect(prices, \"price 欄位未由小到大排序\").to.eql(sortedPrices);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?sort=price,asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "price,asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by price DESC(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    // 確認有 data 屬性\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    // 確認 data 是陣列，且長度大於 0\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"// 3. 驗證 data 裡的 price 由大到小排序\r",
+							"pm.test(\"data 內的 price 由大到小排序\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const prices = json.data.map(item => item.price);\r",
+							"    // 複製一份並用 b - a 排序（由大到小）作為參考\r",
+							"    const sortedDesc = [...prices].sort((a, b) => b - a);\r",
+							"    pm.expect(prices, \"price 欄位未由大到小排序\").to.eql(sortedDesc);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?sort=price,desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "price,desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by name ASC(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證 data 裡的 name 由 A → Z 排序\r",
+							"pm.test(\"data 內的 name 由 A 到 Z 排序\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const names = json.data.map(item => item.name);\r",
+							"    // 用 localeCompare 做正確的字串排序\r",
+							"    const sorted = [...names].sort((a, b) => a.localeCompare(b));\r",
+							"    pm.expect(names, \"name 欄位未由 A→Z 排序\").to.eql(sorted);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?sort=name,asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "name,asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by name DESC(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證 data 裡的 name 由 Z → A 排序 (DESC)\r",
+							"pm.test(\"data 內的 name 由 Z 到 A 排序\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const names = json.data.map(item => item.name);\r",
+							"    // 複製一份並用 b.localeCompare(a) 排序（由大到小）\r",
+							"    const sortedDesc = [...names].sort((a, b) => b.localeCompare(a));\r",
+							"    pm.expect(names, \"name 欄位未由 Z→A 排序\").to.eql(sortedDesc);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?sort=name,desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "name,desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by price between 1,20(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有 price 都在 1 ~ 20 範圍內\r",
+							"pm.test(\"data 內的 price 都介於 1 到 20 之間\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"price\");\r",
+							"        pm.expect(item.price, `第 ${idx + 1} 筆 price 值 (${item.price}) 不在範圍內`).to.be.within(1, 20);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?between=price,1,20",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "between",
+							"value": "price,1,20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by price between 1,20 ASC(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有 price 都在 1 ~ 20 範圍內\r",
+							"pm.test(\"data 內的 price 都介於 1 到 20 之間\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"price\");\r",
+							"        pm.expect(item.price, `第 ${idx + 1} 筆 price 值 (${item.price}) 不在範圍內`).to.be.within(1, 20);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證 data 裡的 price 由小到大排序\r",
+							"pm.test(\"data 內的 price 由小到大排序\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const prices = json.data.map(item => item.price);\r",
+							"    // 複製一份並排序作為參考\r",
+							"    const sortedPrices = [...prices].sort((a, b) => a - b);\r",
+							"    pm.expect(prices, \"price 欄位未由小到大排序\").to.eql(sortedPrices);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?between=price,1,20&sort=price,asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "between",
+							"value": "price,1,20"
+						},
+						{
+							"key": "sort",
+							"value": "price,asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by price between 1,20 DESC(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有 price 都在 1 ~ 20 範圍內\r",
+							"pm.test(\"data 內的 price 都介於 1 到 20 之間\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"price\");\r",
+							"        pm.expect(item.price, `第 ${idx + 1} 筆 price 值 (${item.price}) 不在範圍內`).to.be.within(1, 20);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證 data 裡的 price 由大到小排序\r",
+							"pm.test(\"data 內的 price 由大到小排序\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const prices = json.data.map(item => item.price);\r",
+							"    // 複製一份並用 b - a 排序（由大到小）作為參考\r",
+							"    const sortedDesc = [...prices].sort((a, b) => b - a);\r",
+							"    pm.expect(prices, \"price 欄位未由大到小排序\").to.eql(sortedDesc);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?between=price,1,20&sort=price,desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "between",
+							"value": "price,1,20"
+						},
+						{
+							"key": "sort",
+							"value": "price,desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by category and price between 1,999(200)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有 price 都在 1 ~ 20 範圍內\r",
+							"pm.test(\"data 內的 price 都介於 1 到 999 之間\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"price\");\r",
+							"        pm.expect(item.price, `第 ${idx + 1} 筆 price 值 (${item.price}) 不在範圍內`).to.be.within(1, 999);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證所有 category.id 都等於傳入的 categoryId\r",
+							"pm.test(\"data 內的 category.id 都等於傳入的 categoryId\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const expectedCategoryId = pm.collectionVariables.get(\"categoryId\");\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item)\r",
+							"          .to.have.nested.property(\"category.id\", expectedCategoryId,\r",
+							"            `第 ${idx + 1} 筆 category.id (${item.category.id}) 應為 ${expectedCategoryId}`);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_category={{categoryId}}&between=price,1,999",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_category",
+							"value": "{{categoryId}}"
+						},
+						{
+							"key": "between",
+							"value": "price,1,999"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://api.practicesoftwaretesting.com",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pageNo",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "pageLast",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
