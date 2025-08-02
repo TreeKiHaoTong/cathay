@@ -1,0 +1,330 @@
+{
+	"info": {
+		"_postman_id": "b418675b-5e6b-460c-8794-1450c7ae8310",
+		"name": "cathay_brands",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46093295",
+		"_collection_link": "https://ryan-6671504.postman.co/workspace/Ryan's-Workspace~fe01d57c-6601-485a-846d-76233ed274f1/collection/46093295-b418675b-5e6b-460c-8794-1450c7ae8310?action=share&source=collection_link&creator=46093295"
+	},
+	"item": [
+		{
+			"name": "Get All Brands",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"// 0. 驗證 status code\r",
+							"pm.test(\"狀態碼是 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 1. 基本回應格式檢查\r",
+							"pm.test(\"回應是陣列格式\", () => {\r",
+							"    pm.expect(json, \"回應應該是陣列\").to.be.an(\"array\");\r",
+							"    pm.expect(json.length, \"品牌列表不應為空\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"// 簡單 helper：檢查某個物件有一組欄位\r",
+							"function expectFields(obj, fields, label) {\r",
+							"    fields.forEach(f => pm.expect(obj, `${label} 缺少欄位 ${f}`).to.have.property(f));\r",
+							"}\r",
+							"\r",
+							"// 2. 品牌資料結構檢查\r",
+							"pm.test(\"每個品牌都有必要欄位且型態正確\", () => {\r",
+							"    json.forEach((item, idx) => {\r",
+							"        const label = `品牌 ${idx}`;\r",
+							"\r",
+							"        // 必要欄位檢查\r",
+							"        expectFields(item, [\"id\", \"name\", \"slug\"], label);\r",
+							"\r",
+							"        // 型態檢查\r",
+							"        pm.expect(item.id, `${label} id 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.name, `${label} name 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.slug, `${label} slug 不是字串`).to.be.a(\"string\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 3. 儲存第一個品牌的 ID 作為 collection variable\r",
+							"if (json.length > 0) {\r",
+							"    const firstBrandId = json[0].id;\r",
+							"    pm.collectionVariables.set(\"brandId\", firstBrandId);\r",
+							"    console.log(\"設定 brandId:\", firstBrandId);\r",
+							"}\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/brands",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"brands"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Brand By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const item = pm.response.json();\r",
+							"\r",
+							"// 0. 驗證 status code\r",
+							"pm.test(\"狀態碼是 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 簡單 helper：檢查某個物件有一組欄位\r",
+							"function expectFields(obj, fields, label) {\r",
+							"    fields.forEach(f => pm.expect(obj, `${label} 缺少欄位 ${f}`).to.have.property(f));\r",
+							"}\r",
+							"\r",
+							"// 1. 品牌詳細資料結構檢查\r",
+							"pm.test(\"品牌詳細資料有正確欄位且型態正確\", () => {\r",
+							"    // 必要欄位檢查\r",
+							"    expectFields(item, [\"id\", \"name\", \"slug\"], \"品牌詳細資料\");\r",
+							"\r",
+							"    // 型態檢查\r",
+							"    pm.expect(item.id, \"id 不是字串\").to.be.a(\"string\");\r",
+							"    pm.expect(item.name, \"name 不是字串\").to.be.a(\"string\");\r",
+							"    pm.expect(item.slug, \"slug 不是字串\").to.be.a(\"string\");\r",
+							"\r",
+							"    // 驗證傳入的 brandId 與回應的 id 一致\r",
+							"    const expectedId = pm.collectionVariables.get(\"brandId\");\r",
+							"    pm.expect(item.id, \"回應的 id 應與請求的 brandId 一致\").to.equal(expectedId);\r",
+							"});\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/brands/{{brandId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"brands",
+						"{{brandId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Brand Without Authentication – 401 Unauthorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 根據API文檔，刪除品牌需要管理員權限\r",
+							"// 未認證情況下應該回傳401\r",
+							"pm.test(\"狀態碼是 401\", () => {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"// 檢查認證錯誤回應格式\r",
+							"pm.test(\"錯誤回應格式正確\", () => {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json, \"回應應為物件\").to.be.an(\"object\");\r",
+							"    \r",
+							"    // 常見的認證錯誤格式\r",
+							"    const hasAuthError = json.hasOwnProperty(\"message\") || \r",
+							"                         json.hasOwnProperty(\"error\");\r",
+							"    \r",
+							"    pm.expect(hasAuthError, \"回應應包含認證錯誤訊息\").to.be.true;\r",
+							"});\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/brands/{{brandId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"brands",
+						"{{brandId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Brands By Name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"// 0. 驗證 status code\r",
+							"pm.test(\"狀態碼是 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 1. 基本回應格式檢查\r",
+							"pm.test(\"回應是陣列格式\", () => {\r",
+							"    pm.expect(json, \"搜尋結果應該是陣列\").to.be.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 簡單 helper：檢查某個物件有一組欄位\r",
+							"function expectFields(obj, fields, label) {\r",
+							"    fields.forEach(f => pm.expect(obj, `${label} 缺少欄位 ${f}`).to.have.property(f));\r",
+							"}\r",
+							"\r",
+							"// 2. 搜尋結果檢查\r",
+							"pm.test(\"搜尋結果格式正確\", () => {\r",
+							"    if (json.length > 0) {\r",
+							"        json.forEach((item, idx) => {\r",
+							"            const label = `搜尋結果 ${idx}`;\r",
+							"            \r",
+							"            // 必要欄位檢查\r",
+							"            expectFields(item, [\"id\", \"name\", \"slug\"], label);\r",
+							"            \r",
+							"            // 型態檢查\r",
+							"            pm.expect(item.id, `${label} id 不是字串`).to.be.a(\"string\");\r",
+							"            pm.expect(item.name, `${label} name 不是字串`).to.be.a(\"string\");\r",
+							"            pm.expect(item.slug, `${label} slug 不是字串`).to.be.a(\"string\");\r",
+							"        });\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"// 3. 檢查搜尋關聯性（如果有結果）\r",
+							"pm.test(\"搜尋結果包含關鍵字\", () => {\r",
+							"    if (json.length > 0) {\r",
+							"        const searchKeyword = \"ForgeFlex\"; // 搜尋關鍵字\r",
+							"        const hasRelevantResult = json.some(item => \r",
+							"            item.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||\r",
+							"            item.slug.toLowerCase().includes(searchKeyword.toLowerCase())\r",
+							"        );\r",
+							"        pm.expect(hasRelevantResult, \"至少一個結果應包含搜尋關鍵字\").to.be.true;\r",
+							"    }\r",
+							"});\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/brands/search?q=ForgeFlex",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"brands",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "ForgeFlex"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://api.practicesoftwaretesting.com",
+			"type": "string"
+		},
+		{
+			"key": "brandId",
+			"value": ""
+		}
+	]
+}

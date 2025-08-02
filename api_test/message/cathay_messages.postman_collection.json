@@ -1,0 +1,123 @@
+{
+	"info": {
+		"_postman_id": "67b965d7-6a31-4004-ba92-3decf1dee27d",
+		"name": "cathay_messages",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46093295",
+		"_collection_link": "https://ryan-6671504.postman.co/workspace/Ryan's-Workspace~fe01d57c-6601-485a-846d-76233ed274f1/collection/46093295-67b965d7-6a31-4004-ba92-3decf1dee27d?action=share&source=collection_link&creator=46093295"
+	},
+	"item": [
+		{
+			"name": "POST New Contact Message",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();",
+							"",
+							"// 驗證狀態碼",
+							"pm.test(\"狀態碼是 200\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// 驗證回應格式並儲存 message ID",
+							"pm.test(\"成功建立訊息並儲存 ID\", () => {",
+							"    pm.expect(json, \"回應應該是物件\").to.be.an(\"object\");",
+							"    ",
+							"    // 檢查必要欄位",
+							"    const requiredFields = [\"id\", \"name\", \"email\", \"subject\", \"message\", \"status\", \"created_at\"];",
+							"    requiredFields.forEach(field => {",
+							"        pm.expect(json, `缺少 ${field} 欄位`).to.have.property(field);",
+							"    });",
+							"    ",
+							"    // 儲存 message ID 供後續測試使用",
+							"    const messageId = json.id;",
+							"    pm.expect(messageId, \"message ID 不能為空\").to.not.be.empty;",
+							"    pm.collectionVariables.set(\"created_message_id\", messageId);",
+							"});",
+							"",
+							"// 驗證資料內容正確",
+							"pm.test(\"提交資料正確回傳\", () => {",
+							"    pm.expect(json.name).to.equal(\"Test User\");",
+							"    pm.expect(json.email).to.equal(\"test@example.com\");",
+							"    pm.expect(json.subject).to.equal(\"API 測試訊息\");",
+							"    pm.expect(json.status).to.equal(\"NEW\");",
+							"});",
+							"",
+							"// 驗證時間格式",
+							"pm.test(\"時間格式正確\", () => {",
+							"    const createdAt = json.created_at;",
+							"    pm.expect(createdAt, \"created_at 不能為空\").to.not.be.empty;",
+							"    // 檢查時間格式 YYYY-MM-DD HH:MM:SS",
+							"    const timePattern = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"    pm.expect(createdAt, \"時間格式不正確\").to.match(timePattern);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"subject\": \"API 測試訊息\",\n    \"message\": \"這是一個測試訊息\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/messages",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"messages"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://api.practicesoftwaretesting.com"
+		},
+		{
+			"key": "messageId",
+			"value": ""
+		},
+		{
+			"key": "created_message_id",
+			"value": ""
+		}
+	]
+}

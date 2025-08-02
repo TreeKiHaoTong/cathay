@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "5bc8487b-7589-4809-be1f-ec37ef58f2a6",
+		"name": "cathay_categories",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46093295",
+		"_collection_link": "https://ryan-6671504.postman.co/workspace/Ryan's-Workspace~fe01d57c-6601-485a-846d-76233ed274f1/collection/46093295-5bc8487b-7589-4809-be1f-ec37ef58f2a6?action=share&source=collection_link&creator=46093295"
+	},
+	"item": [
+		{
+			"name": "Get All Categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"// 0. 驗證 status code\r",
+							"pm.test(\"狀態碼是 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 1. 基本回應格式檢查\r",
+							"pm.test(\"回應是陣列格式\", () => {\r",
+							"    pm.expect(json, \"回應應該是陣列\").to.be.an(\"array\");\r",
+							"    pm.expect(json.length, \"分類列表不應為空\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"// 簡單 helper：檢查某個物件有一組欄位\r",
+							"function expectFields(obj, fields, label) {\r",
+							"    fields.forEach(f => pm.expect(obj, `${label} 缺少欄位 ${f}`).to.have.property(f));\r",
+							"}\r",
+							"\r",
+							"// 2. 分類資料結構檢查\r",
+							"pm.test(\"每個分類都有必要欄位且型態正確\", () => {\r",
+							"    json.forEach((item, idx) => {\r",
+							"        const label = `分類 ${idx}`;\r",
+							"\r",
+							"        // 必要欄位檢查\r",
+							"        expectFields(item, [\"id\", \"parent_id\", \"name\", \"slug\"], label);\r",
+							"\r",
+							"        // 型態檢查\r",
+							"        pm.expect(item.id, `${label} id 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.name, `${label} name 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.slug, `${label} slug 不是字串`).to.be.a(\"string\");\r",
+							"        \r",
+							"        // parent_id 可能是 null 或 string\r",
+							"        if (item.parent_id !== null) {\r",
+							"            pm.expect(item.parent_id, `${label} parent_id 應為字串或 null`).to.be.a(\"string\");\r",
+							"        }\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 3. 儲存第一個分類的 ID 作為 collection variable\r",
+							"if (json.length > 0) {\r",
+							"    const firstCategoryId = json[0].id;\r",
+							"    pm.collectionVariables.set(\"categoryId\", firstCategoryId);\r",
+							"    console.log(\"設定 categoryId:\", firstCategoryId);\r",
+							"}\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/categories",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Category Tree",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"// 0. 驗證 status code\r",
+							"pm.test(\"狀態碼是 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 1. 基本回應格式檢查\r",
+							"pm.test(\"回應是陣列格式\", () => {\r",
+							"    pm.expect(json, \"回應應該是陣列\").to.be.an(\"array\");\r",
+							"    pm.expect(json.length, \"分類樹不應為空\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"// 簡單 helper：檢查某個物件有一組欄位\r",
+							"function expectFields(obj, fields, label) {\r",
+							"    fields.forEach(f => pm.expect(obj, `${label} 缺少欄位 ${f}`).to.have.property(f));\r",
+							"}\r",
+							"\r",
+							"// 2. 分類樹結構檢查\r",
+							"pm.test(\"每個分類樹節點都有正確結構\", () => {\r",
+							"    json.forEach((item, idx) => {\r",
+							"        const label = `分類樹節點 ${idx}`;\r",
+							"\r",
+							"        // 必要欄位檢查\r",
+							"        expectFields(item, [\"id\", \"parent_id\", \"name\", \"slug\"], label);\r",
+							"\r",
+							"        // 型態檢查\r",
+							"        pm.expect(item.id, `${label} id 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.name, `${label} name 不是字串`).to.be.a(\"string\");\r",
+							"        pm.expect(item.slug, `${label} slug 不是字串`).to.be.a(\"string\");\r",
+							"\r",
+							"        // 檢查是否有子分類\r",
+							"        if (item.hasOwnProperty(\"children\")) {\r",
+							"            pm.expect(item.children, `${label} children 應為陣列`).to.be.an(\"array\");\r",
+							"        }\r",
+							"    });\r",
+							"});\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/categories/tree",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"categories",
+						"tree"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Category Without Authentication – 401 Unauthorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 根據API文檔，刪除分類需要管理員權限\r",
+							"// 未認證情況下應該回傳401\r",
+							"pm.test(\"狀態碼是 401\", () => {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"// 檢查認證錯誤回應格式\r",
+							"pm.test(\"錯誤回應格式正確\", () => {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json, \"回應應為物件\").to.be.an(\"object\");\r",
+							"    \r",
+							"    // 常見的認證錯誤格式\r",
+							"    const hasAuthError = json.hasOwnProperty(\"message\") || \r",
+							"                         json.hasOwnProperty(\"error\");\r",
+							"    \r",
+							"    pm.expect(hasAuthError, \"回應應包含認證錯誤訊息\").to.be.true;\r",
+							"});\r"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/categories/{{categoryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"categories",
+						"{{categoryId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://api.practicesoftwaretesting.com",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": ""
+		}
+	]
+}

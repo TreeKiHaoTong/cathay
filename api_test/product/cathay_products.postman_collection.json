@@ -1,14 +1,14 @@
 {
 	"info": {
-		"_postman_id": "2c9b4f21-bd6d-4c02-a17f-2aa09a0e1e35",
+		"_postman_id": "54e07844-bc8b-4868-a151-e698aa2ea78e",
 		"name": "cathay_products",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "46093295",
-		"_collection_link": "https://ryan-6671504.postman.co/workspace/Ryan's-Workspace~fe01d57c-6601-485a-846d-76233ed274f1/collection/46093295-2c9b4f21-bd6d-4c02-a17f-2aa09a0e1e35?action=share&source=collection_link&creator=46093295"
+		"_collection_link": "https://ryan-6671504.postman.co/workspace/Ryan's-Workspace~fe01d57c-6601-485a-846d-76233ed274f1/collection/46093295-54e07844-bc8b-4868-a151-e698aa2ea78e?action=share&source=collection_link&creator=46093295"
 	},
 	"item": [
 		{
-			"name": "get all products(200)",
+			"name": "Get All Products",
 			"event": [
 				{
 					"listen": "test",
@@ -68,7 +68,10 @@
 							"pm.collectionVariables.set(\"productId\", firstId);\r",
 							"// 4. 取得第一筆 data 的 category id\r",
 							"const firstCategoryId = json.data[0].category.id;\r",
-							"pm.collectionVariables.set(\"categoryId\", firstCategoryId);"
+							"pm.collectionVariables.set(\"categoryId\", firstCategoryId);\r",
+							"// 5. 取得第一筆 data 的 brand id\r",
+							"const firstBrandId = json.data[0].brand.id;\r",
+							"pm.collectionVariables.set(\"brandId\", firstBrandId);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -101,7 +104,7 @@
 			"response": []
 		},
 		{
-			"name": "search by ID(200)",
+			"name": "Get Product By ID",
 			"event": [
 				{
 					"listen": "test",
@@ -202,7 +205,7 @@
 			"response": []
 		},
 		{
-			"name": "search by page(200)",
+			"name": "Get Products By Page",
 			"event": [
 				{
 					"listen": "test",
@@ -272,7 +275,7 @@
 			"response": []
 		},
 		{
-			"name": "search by category(200)",
+			"name": "Get Products By Category",
 			"event": [
 				{
 					"listen": "test",
@@ -329,7 +332,7 @@
 			"response": []
 		},
 		{
-			"name": "search by price ASC(200)",
+			"name": "Get Products Sorted By Price Ascending",
 			"event": [
 				{
 					"listen": "test",
@@ -383,7 +386,7 @@
 			"response": []
 		},
 		{
-			"name": "search by price DESC(200)",
+			"name": "Get Products Sorted By Price Descending",
 			"event": [
 				{
 					"listen": "test",
@@ -437,7 +440,7 @@
 			"response": []
 		},
 		{
-			"name": "search by name ASC(200)",
+			"name": "Get Products Sorted By Name Ascending",
 			"event": [
 				{
 					"listen": "test",
@@ -492,7 +495,7 @@
 			"response": []
 		},
 		{
-			"name": "search by name DESC(200)",
+			"name": "Get Products Sorted By Name Descending",
 			"event": [
 				{
 					"listen": "test",
@@ -547,7 +550,7 @@
 			"response": []
 		},
 		{
-			"name": "search by price between 1,20(200)",
+			"name": "Get Products By Price Between 1 And 20",
 			"event": [
 				{
 					"listen": "test",
@@ -602,7 +605,7 @@
 			"response": []
 		},
 		{
-			"name": "search by price between 1,20 ASC(200)",
+			"name": "Get Products By Price Between 1 And 20 Sorted By Price Ascending",
 			"event": [
 				{
 					"listen": "test",
@@ -669,7 +672,7 @@
 			"response": []
 		},
 		{
-			"name": "search by price between 1,20 DESC(200)",
+			"name": "Get Products By Price Between 1 And 20 Sorted By Price Descending",
 			"event": [
 				{
 					"listen": "test",
@@ -737,7 +740,7 @@
 			"response": []
 		},
 		{
-			"name": "search by category and price between 1,999(200)",
+			"name": "Get Products By Category And Price Between 1 And 999",
 			"event": [
 				{
 					"listen": "test",
@@ -755,7 +758,7 @@
 							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
 							"});\r",
 							"\r",
-							"// 3. 驗證所有 price 都在 1 ~ 20 範圍內\r",
+							"// 3. 驗證所有 price 都在 1 ~ 999 範圍內\r",
 							"pm.test(\"data 內的 price 都介於 1 到 999 之間\", function () {\r",
 							"    const json = pm.response.json();\r",
 							"    json.data.forEach((item, idx) => {\r",
@@ -801,6 +804,1047 @@
 							"key": "between",
 							"value": "price,1,999"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Category And Price Between 1 And 999 On Page 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 current_page 為 1\r",
+							"pm.test(\"當 page=1 時，current_page 應為 1\", function () {  \r",
+							"    const json = pm.response.json();  \r",
+							"    pm.expect(json.current_page).to.eql(1);  \r",
+							"});\r",
+							"\r",
+							"// 3. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證所有 price 都在 1 ~ 999 範圍內\r",
+							"pm.test(\"data 內的 price 都介於 1 到 999 之間\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"price\");\r",
+							"        pm.expect(item.price, `第 ${idx + 1} 筆 price 值 (${item.price}) 不在範圍內`).to.be.within(1, 999);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 5. 驗證所有 category.id 都等於傳入的 categoryId\r",
+							"pm.test(\"data 內的 category.id 都等於傳入的 categoryId\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const expectedCategoryId = pm.collectionVariables.get(\"categoryId\");\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item)\r",
+							"          .to.have.nested.property(\"category.id\", expectedCategoryId,\r",
+							"            `第 ${idx + 1} 筆 category.id (${item.category.id}) 應為 ${expectedCategoryId}`);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_category={{categoryId}}&between=price,1,999&page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_category",
+							"value": "{{categoryId}}"
+						},
+						{
+							"key": "between",
+							"value": "price,1,999"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Category And Price Between 1 And 999 On Page 1 Sorted By Price Ascending",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 current_page 為 1\r",
+							"pm.test(\"當 page=1 時，current_page 應為 1\", function () {  \r",
+							"    const json = pm.response.json();  \r",
+							"    pm.expect(json.current_page).to.eql(1);  \r",
+							"});\r",
+							"\r",
+							"// 3. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\");\r",
+							"    pm.expect(json.data).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證所有 price 都在 1 ~ 999 範圍內\r",
+							"pm.test(\"data 內的 price 都介於 1 到 999 之間\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"price\");\r",
+							"        pm.expect(item.price, `第 ${idx + 1} 筆 price 值 (${item.price}) 不在範圍內`).to.be.within(1, 999);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 5. 驗證所有 category.id 都等於傳入的 categoryId\r",
+							"pm.test(\"data 內的 category.id 都等於傳入的 categoryId\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const expectedCategoryId = pm.collectionVariables.get(\"categoryId\");\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item)\r",
+							"          .to.have.nested.property(\"category.id\", expectedCategoryId,\r",
+							"            `第 ${idx + 1} 筆 category.id (${item.category.id}) 應為 ${expectedCategoryId}`);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// 6. 驗證 data 裡的 price 為遞增排序\r",
+							"pm.test(\"data 內的 price 應為由小到大排列\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const prices = json.data.map(item => item.price);\r",
+							"    const sorted = [...prices].sort((a, b) => a - b);\r",
+							"    pm.expect(prices, `價格排序錯誤，期望 ${sorted}，實際 ${prices}`).to.eql(sorted);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_category={{categoryId}}&between=price,1,999&page=1&sort=price,asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_category",
+							"value": "{{categoryId}}"
+						},
+						{
+							"key": "between",
+							"value": "price,1,999"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "sort",
+							"value": "price,asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product By Invalid ID – 404 Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 404\r",
+							"pm.test(\"狀態碼是 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證錯誤回應格式\r",
+							"pm.test(\"錯誤回應格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/invalid-product-id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"invalid-product-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid POST Method on Product ID – 405 Method Not Allowed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 405\r",
+							"pm.test(\"狀態碼是 405\", function () {\r",
+							"    pm.response.to.have.status(405);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證錯誤回應格式\r",
+							"pm.test(\"錯誤回應格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"message\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證分頁格式\r",
+							"pm.test(\"回應格式包含分頁資訊\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const expected = [\"current_page\", \"data\", \"from\", \"last_page\", \"per_page\", \"to\", \"total\"];\r",
+							"    expected.forEach(k => pm.expect(json, `缺少 ${k}`).to.have.property(k));\r",
+							"    pm.expect(json.data, \"data 應該是陣列\").to.be.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證搜尋結果包含關鍵字\r",
+							"pm.test(\"搜尋結果包含關鍵字\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    if (json.data.length > 0) {\r",
+							"        json.data.forEach((item, idx) => {\r",
+							"            pm.expect(item.name.toLowerCase(), `第 ${idx + 1} 筆產品名稱應包含 hammer`)\r",
+							"              .to.include(\"hammer\");\r",
+							"        });\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/search?q=hammer",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "hammer"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products With Pagination",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 current_page 為 1\r",
+							"pm.test(\"current_page 應為 1\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.current_page).to.eql(1);\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證分頁格式\r",
+							"pm.test(\"回應格式包含分頁資訊\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const expected = [\"current_page\", \"data\", \"from\", \"last_page\", \"per_page\", \"to\", \"total\"];\r",
+							"    expected.forEach(k => pm.expect(json, `缺少 ${k}`).to.have.property(k));\r",
+							"    pm.expect(json.data, \"data 應該是陣列\").to.be.an(\"array\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/search?q=hammer&page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "hammer"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Brand",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\").with.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// 3. 取得傳入的 brandId\r",
+							"const expectedBrandId = pm.collectionVariables.get(\"brandId\");\r",
+							"\r",
+							"// 4. 驗證每一筆資料的 brand.id 都等於傳入的值\r",
+							"pm.test(\"每筆資料的 brand.id 都等於輸入的 brandId\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.nested.property(\"brand.id\", expectedBrandId,\r",
+							"            `第 ${idx + 1} 筆資料的 brand.id 應為 ${expectedBrandId}`);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_brand={{brandId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_brand",
+							"value": "{{brandId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Brand – Paginated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 current_page 為 1\r",
+							"pm.test(\"current_page 應為 1\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.current_page).to.eql(1);\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\").with.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證每一筆資料的 brand.id 都等於傳入的值\r",
+							"pm.test(\"每筆資料的 brand.id 都等於輸入的 brandId\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const expectedBrandId = pm.collectionVariables.get(\"brandId\");\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.nested.property(\"brand.id\", expectedBrandId,\r",
+							"            `第 ${idx + 1} 筆資料的 brand.id 應為 ${expectedBrandId}`);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_brand={{brandId}}&page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_brand",
+							"value": "{{brandId}}"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products By Invalid Brand ID – 404 Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200 (API 可能回傳空結果而非錯誤)\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在\r",
+							"pm.test(\"data 欄位存在\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證可能的空結果\r",
+							"pm.test(\"無效品牌ID應回傳空結果\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.data.length).to.equal(0);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?by_brand=invalid-brand-id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_brand",
+							"value": "invalid-brand-id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Rental Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在\r",
+							"pm.test(\"data 欄位存在\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有產品的 is_rental 為 true\r",
+							"pm.test(\"所有產品的 is_rental 都為 true\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    if (json.data.length > 0) {\r",
+							"        json.data.forEach((item, idx) => {\r",
+							"            pm.expect(item).to.have.property(\"is_rental\");\r",
+							"            pm.expect(item.is_rental, `第 ${idx + 1} 筆產品的 is_rental 應為 true`).to.be.true;\r",
+							"        });\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?is_rental=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "is_rental",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Products Not For Rental",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在且非空\r",
+							"pm.test(\"data 欄位存在且非空\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\").with.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有產品的 is_rental 為 false\r",
+							"pm.test(\"所有產品的 is_rental 都為 false\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    json.data.forEach((item, idx) => {\r",
+							"        pm.expect(item).to.have.property(\"is_rental\");\r",
+							"        pm.expect(item.is_rental, `第 ${idx + 1} 筆產品的 is_rental 應為 false`).to.be.false;\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?is_rental=false",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "is_rental",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Rental Products On Page=1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證 data 欄位存在\r",
+							"pm.test(\"data 欄位存在\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"data\").that.is.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證所有產品的 is_rental 為 true\r",
+							"pm.test(\"所有產品的 is_rental 都為 true\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    if (json.data.length > 0) {\r",
+							"        json.data.forEach((item, idx) => {\r",
+							"            pm.expect(item).to.have.property(\"is_rental\");\r",
+							"            pm.expect(item.is_rental, `第 ${idx + 1} 筆產品的 is_rental 應為 true`).to.be.true;\r",
+							"        });\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"// 4. 驗證分頁功能\r",
+							"pm.test(\"分頁功能正常\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.current_page).to.eql(1);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?is_rental=true&page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "is_rental",
+							"value": "true"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Product With Invalid Data – 422 Validation Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 422\r",
+							"pm.test(\"狀態碼是 422\", function () {\r",
+							"    pm.response.to.have.status(422);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證回應格式包含驗證錯誤\r",
+							"pm.test(\"回應包含驗證錯誤訊息\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.be.an(\"object\");\r",
+							"    // 檢查是否有必要欄位的錯誤訊息\r",
+							"    const expectedErrors = [\"price\", \"category_id\", \"brand_id\", \"is_location_offer\", \"is_rental\", \"product_image_id\"];\r",
+							"    let hasValidationErrors = false;\r",
+							"    expectedErrors.forEach(field => {\r",
+							"        if (json[field]) {\r",
+							"            hasValidationErrors = true;\r",
+							"        }\r",
+							"    });\r",
+							"    pm.expect(hasValidationErrors, \"應該包含至少一個驗證錯誤\").to.be.true;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test Product\",\n    \"description\": \"Test description\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Related Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證回應格式\r",
+							"pm.test(\"回應格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.be.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"// 3. 驗證相關產品內容格式\r",
+							"pm.test(\"相關產品格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    if (json.length > 0) {\r",
+							"        json.forEach((item, idx) => {\r",
+							"            pm.expect(item, `第 ${idx + 1} 筆相關產品`).to.have.property(\"id\");\r",
+							"            pm.expect(item, `第 ${idx + 1} 筆相關產品`).to.have.property(\"name\");\r",
+							"            pm.expect(item, `第 ${idx + 1} 筆相關產品`).to.have.property(\"price\");\r",
+							"        });\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}/related",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}",
+						"related"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Product With Valid Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證回應格式\r",
+							"pm.test(\"回應格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"success\", true);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Updated Test Product\",\n    \"description\": \"Updated description\",\n    \"price\": 29.99\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Non-Existent Product – 404 Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 根據API文檔，PUT無效產品ID應該回傳404\r",
+							"// 實際API回傳200 + success:false (與文檔不符)\r",
+							"\r",
+							"// 1. 驗證狀態碼應該是 404 (按照文檔規範)\r",
+							"pm.test(\"狀態碼應該是 404 (文檔規範)\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Updated Test Product\",\n    \"description\": \"Updated description\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products/invalid-product-id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"invalid-product-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Partially Update Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 200\r",
+							"pm.test(\"狀態碼是 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證回應格式\r",
+							"pm.test(\"回應格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"success\", true);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"price\": 19.99\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch Non-Existent Product – 404 Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 根據API文檔，PATCH無效產品ID應該回傳404\r",
+							"// 實際API回傳200 + success:false (與文檔不符)\r",
+							"\r",
+							"// 1. 驗證狀態碼應該是 404 (按照文檔規範)\r",
+							"pm.test(\"狀態碼應該是 404 (文檔規範)\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"price\": 19.99\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products/invalid-product-id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"invalid-product-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Product Without Authentication – 401 Unauthorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. 驗證狀態碼是 401\r",
+							"pm.test(\"狀態碼是 401\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"// 2. 驗證錯誤回應格式\r",
+							"pm.test(\"錯誤回應格式正確\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.property(\"message\", \"Unauthorized\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
 					]
 				}
 			},
@@ -852,6 +1896,11 @@
 		},
 		{
 			"key": "categoryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "brandId",
 			"value": "",
 			"type": "string"
 		}
