@@ -1,6 +1,6 @@
 # Cathay API Testing Framework
 
-API 自動化測試框架，測試 Product、Category、Brand、Message三個模組的 API。
+API 自動化測試框架，測試 Product、Category、Brand、Messagen四個模組的 API。
 
 ## 需要的環境
 
